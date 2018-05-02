@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "CwriteDdrRegInput.h"
 #include "Ccrc.h"
-
+#include <sstream>
 
 CwriteDdrRegInput::CwriteDdrRegInput()
 {
@@ -135,15 +135,19 @@ int CwriteDdrRegInput::bufferSize()
 }
 
 
-int CwriteDdrRegInput::printOut()
+std::string CwriteDdrRegInput::getDataString()
 {
+    std::stringstream tmpSs;
     for (auto a : buffer)
     {
         int tmp = a;
-        std::cout << std::hex << std::setw(2) << std::setfill('0') << tmp << ' ';
+        tmpSs << std::hex << std::setw(2) << std::setfill('0') << tmp << ' ';
     }
 
-    std::cout << std::endl;
-    return 0;
+    tmpSs << std::endl;
+
+    std::string tmpStr = tmpSs.str();
+
+    return tmpStr;
 }
 

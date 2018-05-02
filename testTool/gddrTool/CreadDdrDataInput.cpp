@@ -1,8 +1,9 @@
 #include "stdafx.h"
 #include "CreadDdrDataInput.h"
-#include <iostream>
 #include "Ccrc.h"
+#include <iostream>
 #include <iomanip>
+#include <sstream>
 
 CreadDdrDataInput::CreadDdrDataInput()
 {
@@ -114,14 +115,17 @@ int CreadDdrDataInput::bufferSize()
 }
 
 
-int CreadDdrDataInput::printOut()
+std::string CreadDdrDataInput::getDataString()
 {
+    std::stringstream tmpSs;
     for (auto a : buffer)
     {
         int tmp = a;
-        std::cout << std::hex << std::setw(2) << std::setfill('0') << tmp << ' ';
+        tmpSs << std::hex << std::setw(2) << std::setfill('0') << tmp << ' ';
     }
 
-    std::cout << std::endl;
-    return 0;
+    tmpSs << std::endl;
+
+    std::string tmpStr = tmpSs.str();
+    return tmpStr;
 }

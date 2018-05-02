@@ -7,7 +7,18 @@
 #include "CreadDdrDataInput.h"
 #include "Serial.h"
 #include "testInitConf.h"
+#include "testData.h"
 #include <tchar.h>
+
+static void writeLog(std::string log, CEdit &edit)
+{
+    CString logTmp;
+    int nLength = edit.SendMessage(WM_GETTEXTLENGTH);
+    logTmp.Format(log.data());
+    logTmp += _T("\r\n");
+    edit.SetSel(nLength, nLength);
+    edit.ReplaceSel(logTmp);
+}
 
 int setAddrInit(CSerial &c)
 {
@@ -30,7 +41,7 @@ int setAddrInit(CSerial &c)
     return 0;
 }
 
-int testOneReg(CSerial &c)
+int testOneReg(CSerial &c, CEdit &edit)
 {
     int ret = 0;
     unsigned char ctrlRegWrite[] = { 0x55, 0xaa, 0x31, 0x00, 0x00, 0x00, 0x00, 0x20, 0x34, 0x28, 0x56, 0x92, 0xe5, 0xce };
@@ -46,7 +57,9 @@ int testOneReg(CSerial &c)
     c.Read((TCHAR*)rdrr.bufferSrc(), rdrr.bufferSize(), &readLeng);
 
     rdrr.format();
-    rdrr.printOut();
+
+    writeLog(rdrr.getDataString(), edit);
+
     if (rdrr.checkResponceCrc())
     {
         std::cout << "error crc" << std::endl;
@@ -55,9 +68,9 @@ int testOneReg(CSerial &c)
     return 0;
 }
 
-#define CHECK
+//#define CHECK
 
-int initDataFlow(CSerial &c)
+int initGddrDataFlow(CSerial &c, CEdit &edit)
 {
     CwriteDdrRegInput wdri;
     CreadDdrRegInput rdri;
@@ -96,7 +109,8 @@ int initDataFlow(CSerial &c)
         wdri.setRegAddr(regAddr);
         wdri.setData(regData);
         wdri.calculateCrc();
-        wdri.printOut();
+        
+        writeLog(wdri.getDataString(), edit);
 
 
         c.Write((const TCHAR*)wdri.bufferSrc(), wdri.bufferSize());
@@ -122,14 +136,31 @@ int initDataFlow(CSerial &c)
         {
             std::cout << "checkMagicNum1 error" << std::endl;
         }
-        rdrr.printOut();
+        writeLog(rdrr.getDataString(), edit);
 #endif
     }
 
     return 0;
 }
 
-int readOneReg(CSerial &c, unsigned int addr, unsigned int &addrData)
+int writeOneReg(CSerial &c, unsigned int addr, unsigned int data, CEdit &edit)
+{
+    CwriteDdrRegInput wdri;
+    wdri.setType(3);
+    wdri.setUnicast();
+    wdri.setLowFlagReg();
+    wdri.setChipAddr(0);
+
+    wdri.setRegAddr(addr);
+    wdri.setData(data);
+    wdri.calculateCrc();
+    writeLog(wdri.getDataString(), edit);
+
+    c.Write((const TCHAR*)wdri.bufferSrc(), wdri.bufferSize());
+    return 0;
+}
+
+int readOneReg(CSerial &c, unsigned int addr, unsigned int *addrData, CEdit &edit)
 {
     unsigned int regAddr = 0;
     unsigned int regData = 0;
@@ -145,13 +176,14 @@ int readOneReg(CSerial &c, unsigned int addr, unsigned int &addrData)
     rdri.setChipAddr(0);
     rdri.setRegAddr(regAddr);
     rdri.calculateCrc();
-    rdri.printOut();
+    writeLog(rdri.getDataString(), edit);
     c.Write((const TCHAR*)rdri.bufferSrc(), rdri.bufferSize());
 
     readLength = rdrr.bufferSize();
     c.Read((TCHAR *)rdrr.bufferSrc(), rdrr.bufferSize(), &readLength);
 
     rdrr.format();
+    *addrData = rdrr.getRegData();
     if (rdrr.checkResponceHead())
     {
         std::cout << "checkResponceHead error" << std::endl;
@@ -164,28 +196,11 @@ int readOneReg(CSerial &c, unsigned int addr, unsigned int &addrData)
     {
         std::cout << "checkMagicNum1 error" << std::endl;
     }
-    rdrr.printOut();
+    writeLog(rdrr.getDataString(), edit);
     return 0;
 }
 
-int writeOneReg(CSerial &c, unsigned int addr, unsigned int data)
-{
-    CwriteDdrRegInput wdri;
-    wdri.setType(3);
-    wdri.setUnicast();
-    wdri.setLowFlagReg();
-    wdri.setChipAddr(0);
-
-    wdri.setRegAddr(addr);
-    wdri.setData(data);
-    wdri.calculateCrc();
-    wdri.printOut();
-
-    c.Write((const TCHAR*)wdri.bufferSrc(), wdri.bufferSize());
-    return 0;
-}
-
-int writeDdrData(CSerial &c, unsigned int ad)
+int writeDdrData(CSerial &c, unsigned int ad, unsigned char *ddrData, unsigned int ddrDataLen, CEdit &edit)
 {
     CwriteDdrDataInput wddi;
 
@@ -196,63 +211,21 @@ int writeDdrData(CSerial &c, unsigned int ad)
         addrTest = ad;
     }
 
-    unsigned char ddrIndata[] = { \
-        0x11, 0x11, 0x11, 0x11, 0x12, 0x12, 0x12, 0x12, \
-        0x13, 0x13, 0x13, 0x13, 0x14, 0x14, 0x14, 0x14, \
-        0x15, 0x15, 0x15, 0x15, 0x16, 0x16, 0x16, 0x16, \
-        0x17, 0x17, 0x17, 0x17, 0x18, 0x18, 0x18, 0x18, \
-        0x21, 0x21, 0x21, 0x21, 0x22, 0x22, 0x22, 0x22, \
-        0x23, 0x23, 0x23, 0x23, 0x24, 0x24, 0x24, 0x24, \
-        0x25, 0x25, 0x25, 0x25, 0x26, 0x26, 0x26, 0x26, \
-        0x27, 0x27, 0x27, 0x27, 0x28, 0x28, 0x28, 0x28 };
-    //0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
-            //0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
-        //0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
-        //0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
-        //0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
-        //0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
-        //0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
-        //0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-//0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, \
-        //0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, \
-        //0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, \
-        //0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, \
-        //0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, \
-        //0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, \
-        //0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, \
-        //0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
-//0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, \
-        //0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, \
-        //0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, \
-        //0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, \
-        //0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, \
-        //0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, \
-        //0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, \
-        //0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11 };
-//0x13, 0x52, 0x40, 0x85, 0x8e, 0x0b, 0x12, 0x58, \
-        //0x07, 0x65, 0xa0, 0x94, 0xa1, 0xad, 0x71, 0x45, \
-        //0x5e, 0xb1, 0x3b, 0x0d, 0x7e, 0x88, 0xbb, 0x28, \
-        //0xd8, 0x78, 0x9c, 0x15, 0x44, 0x68, 0x56, 0xb1, \
-        //0xf0, 0xd2, 0x11, 0xbc, 0xcf, 0x01, 0x74, 0x08, \
-        //0xe3, 0xc9, 0xa2, 0x5a, 0xb6, 0x9e, 0x00, 0xa5, \
-        //0xab, 0xa4, 0x21, 0x1d, 0x5c, 0x50, 0xa2, 0x30, \
-        //0x04, 0xeb, 0x14, 0xcb, 0xd8, 0xe3, 0xca, 0x35 };
-
     wddi.setType(3);
     wddi.setUnicast();
     wddi.clearLowFlagReg();
     wddi.setChipAddr(0);
     wddi.setDdrAddr(addrTest);
-    wddi.setData(ddrIndata, sizeof(ddrIndata) / sizeof(ddrIndata[0]));
+    wddi.setData(ddrData, ddrDataLen);
     wddi.calculateCrc();
-    wddi.printOut();
+    writeLog(wddi.getDataString(), edit);
 
     c.Write((const TCHAR*)wddi.bufferSrc(), wddi.bufferSize());
 
     return 0;
 }
 
-int readDdrData(CSerial &c, unsigned int ad)
+int readDdrData(CSerial &c, unsigned int ad, unsigned char *ddrData, unsigned int ddrDataLen, CEdit &edit)
 {
     CreadDdrDataInput rddi;
     CreadDdrDataResponce rddr;
@@ -271,7 +244,7 @@ int readDdrData(CSerial &c, unsigned int ad)
     rddi.setChipAddr(0);
     rddi.setDdrAddr(addrTest);
     rddi.calculateCrc();
-    rddi.printOut();
+    writeLog(rddi.getDataString(), edit);
 
     c.Write((const TCHAR*)rddi.bufferSrc(), rddi.bufferSize());
     std::cout << "read data:" << std::endl;
@@ -290,7 +263,7 @@ int readDdrData(CSerial &c, unsigned int ad)
     {
         std::cout << "checkMagicNum1 error" << std::endl;
     }
-    rddr.printOut();
+    writeLog(rddr.getDataString(), edit);
 
     return 0;
 }

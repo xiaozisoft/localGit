@@ -30,7 +30,7 @@ public:
     unsigned char * bufferSrc();
     int bufferSize();
 
-    int printOut();
+    std::string getDataString();
 
 private:
     std::array<CbyteStream, 2> head;

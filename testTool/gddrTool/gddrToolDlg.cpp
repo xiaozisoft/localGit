@@ -11,6 +11,7 @@
 #include <afxwin.h>
 #include <string>
 #include "tool.h"
+#include "testOperation.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -53,8 +54,6 @@ END_MESSAGE_MAP()
 
 // CgddrToolDlg 对话框
 
-
-
 CgddrToolDlg::CgddrToolDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_GDDRTOOL_DIALOG, pParent)
     , regBaseAddrStr(_T(""))
@@ -80,7 +79,11 @@ void CgddrToolDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Text(pDX, IDC_EDIT_REG_DATA, regValueStr);
     DDV_MaxChars(pDX, regValueStr, 10);
     DDX_Text(pDX, IDC_EDIT_GDDR_ADDR, gaddrAddrStr);
-	DDV_MaxChars(pDX, gaddrAddrStr, 10);
+    DDV_MaxChars(pDX, gaddrAddrStr, 10);
+    DDX_Control(pDX, IDC_COMBO_CHECK, serialCheck);
+    DDX_Control(pDX, IDC_COMBO_DATA_BIT, serialDataBit);
+    DDX_Control(pDX, IDC_COMBO_STOP_BIT, serialStopbit);
+    DDX_Control(pDX, IDC_COMBO_CODE, serialCode);
 }
 
 BEGIN_MESSAGE_MAP(CgddrToolDlg, CDialogEx)
@@ -96,6 +99,10 @@ BEGIN_MESSAGE_MAP(CgddrToolDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BUTTON_ReadData, &CgddrToolDlg::OnBnClickedButtonReaddata)
     ON_BN_CLICKED(IDC_BUTTON_READREG, &CgddrToolDlg::OnBnClickedButtonReadreg)
     //ON_WM_SERIAL(OnSerialMsg)
+    ON_CBN_SELCHANGE(IDC_COMBO_CHECK, &CgddrToolDlg::OnCbnSelchangeComboCheck)
+    ON_CBN_SELCHANGE(IDC_COMBO_DATA_BIT, &CgddrToolDlg::OnCbnSelchangeComboDataBit)
+    ON_CBN_SELCHANGE(IDC_COMBO_STOP_BIT, &CgddrToolDlg::OnCbnSelchangeComboStopBit)
+    ON_CBN_SELCHANGE(IDC_COMBO_CODE, &CgddrToolDlg::OnCbnSelchangeComboCode)
 END_MESSAGE_MAP()
 
 
@@ -135,6 +142,12 @@ BOOL CgddrToolDlg::OnInitDialog()
 	// TODO: 在此添加额外的初始化代码
 
     SetDlgItemText(serialCtrlButton.GetDlgCtrlID(), _T("打开串口"));
+    serialPortNum.SetCurSel(2);
+    serialBoardrate.SetCurSel(0);
+    serialCheck.SetCurSel(2);
+    serialDataBit.SetCurSel(3);
+    serialStopbit.SetCurSel(1);
+    serialCode.SetCurSel(1);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -239,6 +252,9 @@ void CgddrToolDlg::OnCbnSelchangeComboBoard()
 
 void CgddrToolDlg::OnBnClickedButtonInit()
 {
+    setAddrInit(serialM);
+    testOneReg(serialM, recvDataLog);
+    initGddrDataFlow(serialM, recvDataLog);
     // TODO: 初始化ddr控制器
 }
 
@@ -262,6 +278,8 @@ void CgddrToolDlg::OnBnClickedButtonWritereg()
 
     addrTmp = regBaseAddr + regOffsetAddr;
     addrValueTmp = regDataValue;
+
+    writeOneReg(serialM, addrTmp, addrValueTmp, recvDataLog);
 
     CString addrStrTmp, addrValueStrTmp;
     addrStrTmp.Format(_T("%x"), addrTmp);
@@ -287,12 +305,9 @@ void CgddrToolDlg::OnBnClickedButtonReadreg()
 
     addrTmp = regBaseAddr + regOffsetAddr;
 
-    CString test;
-    test.Format(_T("%d"), regOffsetAddr);
+    readOneReg(serialM, addrTmp, &addrValueTmp, recvDataLog);
 
-    writeToLog(test);
-
-    regDataValue = 0x99;
+    regDataValue = addrValueTmp;
     regValueStr.Format(_T("%x"), regDataValue);
     UpdateData(FALSE);
 }
@@ -426,4 +441,28 @@ LRESULT CgddrToolDlg::OnSerialMsg(WPARAM wParam, LPARAM /*lParam*/)
     }
 
     return 0;
+}
+
+
+void CgddrToolDlg::OnCbnSelchangeComboCheck()
+{
+    // TODO: 在此添加控件通知处理程序代码
+}
+
+
+void CgddrToolDlg::OnCbnSelchangeComboDataBit()
+{
+    // TODO: 在此添加控件通知处理程序代码
+}
+
+
+void CgddrToolDlg::OnCbnSelchangeComboStopBit()
+{
+    // TODO: 在此添加控件通知处理程序代码
+}
+
+
+void CgddrToolDlg::OnCbnSelchangeComboCode()
+{
+    // TODO: 在此添加控件通知处理程序代码
 }

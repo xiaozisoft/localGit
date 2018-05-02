@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <string>
 #include "CbyteStream.h"
 #include "CinputType.h"
 
@@ -24,7 +25,7 @@ public:
     unsigned char * bufferSrc();
     int bufferSize();
 
-    int printOut();
+    std::string getDataString();
 private:
     std::array<CbyteStream, 2> head;
     std::array<CbyteStream, 2> tailcrc;

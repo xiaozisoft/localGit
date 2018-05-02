@@ -51,6 +51,15 @@ public:
     CComboBox serialPortNum;
     // 串口波特率选择
     CComboBox serialBoardrate;
+    // 奇偶校验位
+    CComboBox serialCheck;
+    // 数据位
+    CComboBox serialDataBit;
+    // 停止位
+    CComboBox serialStopbit;
+    // 编码
+    CComboBox serialCode;
+
     afx_msg void OnBnClickedButtonSerial();
     afx_msg void OnCbnSelchangeCombo();
     afx_msg void OnCbnSelchangeComboBoard();
@@ -69,4 +78,8 @@ public:
     void writeToLog(CString log);
     afx_msg void OnBnClickedButtonReadreg();
     LRESULT OnSerialMsg(WPARAM wParam, LPARAM /*lParam*/);
+    afx_msg void OnCbnSelchangeComboCheck();
+    afx_msg void OnCbnSelchangeComboDataBit();
+    afx_msg void OnCbnSelchangeComboStopBit();
+    afx_msg void OnCbnSelchangeComboCode();
 };

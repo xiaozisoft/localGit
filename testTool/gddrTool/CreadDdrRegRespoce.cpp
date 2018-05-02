@@ -1,7 +1,8 @@
 #include "stdafx.h"
+#include "CreadDdrRegRespoce.h"
 #include <iostream>
 #include <iomanip>
-#include "CreadDdrRegRespoce.h"
+#include <sstream>
 
 
 CreadDdrRegResponce::CreadDdrRegResponce()
@@ -117,17 +118,20 @@ int CreadDdrRegResponce::format()
     return 0;
 }
 
-int CreadDdrRegResponce::printOut()
+std::string CreadDdrRegResponce::getDataString()
 {
+    std::stringstream tmpSs;
+
     for (unsigned int i = 0; i < sizeof(buffer); i++)
     {
         int tmp = buffer[i];
-        std::cout << std::hex << std::setw(2) << std::setfill('0') << tmp << ' ';
+        tmpSs << std::hex << std::setw(2) << std::setfill('0') << tmp << ' ';
     }
 
-    std::cout << std::endl;
+    tmpSs << std::endl;
 
-    std::cout << "regData:" << std::hex << getRegData() << std::endl;
+    tmpSs << "regData:" << std::hex << getRegData() << std::endl;
 
-    return 0;
+    std::string tmpStr = tmpSs.str();
+    return tmpStr;
 }

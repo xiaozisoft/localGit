@@ -21,7 +21,7 @@ public:
     int bufferSize();
 
     int format();
-    int printOut();
+    std::string getDataString();
 
 private:
     bool errorNum;

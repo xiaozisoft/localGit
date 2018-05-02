@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <string>
 #include "CbyteStream.h"
 
 class CreadDdrDataResponce
@@ -19,7 +20,7 @@ public:
     int bufferSize();
 
     int format();
-    int printOut();
+    std::string getDataString();
 
 private:
     bool errorNum;

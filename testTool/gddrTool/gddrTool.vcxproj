@@ -202,6 +202,7 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="testData.h" />
     <ClInclude Include="testInitConf.h" />
     <ClInclude Include="testOperation.h" />
     <ClInclude Include="tool.h" />
@@ -225,6 +226,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="testData.cpp" />
     <ClCompile Include="testInitConf.cpp" />
     <ClCompile Include="testOperation.cpp" />
     <ClCompile Include="tool.cpp" />

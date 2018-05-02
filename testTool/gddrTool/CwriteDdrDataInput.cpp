@@ -1,7 +1,8 @@
 #include "stdafx.h"
+#include "CwriteDdrDataInput.h"
 #include <iostream>
 #include <iomanip>
-#include "CwriteDdrDataInput.h"
+#include <sstream>
 
 
 CwriteDdrDataInput::CwriteDdrDataInput()
@@ -137,14 +138,19 @@ int CwriteDdrDataInput::bufferSize()
 }
 
 
-int CwriteDdrDataInput::printOut()
+std::string CwriteDdrDataInput::getDataString()
 {
+    std::stringstream tmpSs;
+
     for (auto a : buffer)
     {
         int tmp = a;
-        std::cout << std::hex << std::setw(2) << std::setfill('0') << tmp << ' ';
+        tmpSs << std::hex << std::setw(2) << std::setfill('0') << tmp << ' ';
     }
 
-    std::cout << std::endl;
-    return 0;
+    tmpSs << std::endl;
+
+    std::string tmpStr = tmpSs.str();
+
+    return tmpStr;
 }
