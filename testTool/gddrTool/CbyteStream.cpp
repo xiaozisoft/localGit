@@ -60,11 +60,6 @@ int CbyteStream::get(unsigned char *value)
     unsigned char tmpValue = 0;
 
     tmpValue = oneByte.to_ulong() & 0xff;
-    //for (int i = 7; i >= 0; i--)
-    //{
-    //    tmpValue |= (oneByte[i] ? 1 : 0);
-    //    tmpValue <<= 1;
-    //}
 
     *value = tmpValue;
     return 0;

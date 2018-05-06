@@ -20,8 +20,10 @@ static void writeLog(std::string log, CEdit &edit)
     edit.ReplaceSel(logTmp);
 }
 
-int setAddrInit(CSerial &c)
+int setAddrInit(CSerial &c, CEdit &edit)
 {
+    writeLog(std::string("Set addr!"), edit);
+
     unsigned char setInactive[] = { 0x55, 0xaa, 0x2b, 0x07, 0x00, 0x00, 0x08 };
     unsigned char setAddr[] = { 0x55, 0xaa, 0x20, 0x07, 0x00, 0x00, 0x11 };
     int ret = 0;
@@ -29,32 +31,50 @@ int setAddrInit(CSerial &c)
     ret = c.Write((const TCHAR*)setInactive, sizeof(setInactive));
     if (ret != 0)
     {
-        std::cout << "writeData setInactive error" << std::endl;
+        writeLog(std::string("writeData setInactive error!"), edit);
     }
 
     ret = c.Write((const TCHAR*)setAddr, sizeof(setAddr));
     if (ret != 0)
     {
-        std::cout << "writeData setAddr error" << std::endl;
+        writeLog(std::string("writeData setAddr error!"), edit);
     }
+
+    writeLog(std::string("Set addr OK!"), edit);
 
     return 0;
 }
 
 int testOneReg(CSerial &c, CEdit &edit)
 {
+    writeLog(std::string("One ctrl reg read write test :"), edit);
+
     int ret = 0;
     unsigned char ctrlRegWrite[] = { 0x55, 0xaa, 0x31, 0x00, 0x00, 0x00, 0x00, 0x20, 0x34, 0x28, 0x56, 0x92, 0xe5, 0xce };
     ret = c.Write((const TCHAR*)ctrlRegWrite, sizeof(ctrlRegWrite));
-
+    if (ret != 0)
+    {
+        writeLog(std::string("Write reg command send error!"), edit);
+        return 1;
+    }
     unsigned char ctrlRegRead[] = { 0x55, 0xaa, 0x61, 0x00, 0x00, 0x00, 0x00, 0x20, 0x30, 0xca };
-    c.Write((const TCHAR*)ctrlRegRead, sizeof(ctrlRegRead));
+    ret = c.Write((const TCHAR*)ctrlRegRead, sizeof(ctrlRegRead));
+    if (ret != 0)
+    {
+        writeLog(std::string("Read reg command send error!"), edit);
+        return 2;
+    }
 
     unsigned char ctrlRegReadBack[] = { 0xaa, 0x55, 0x18, 0x00, 0x34, 0x28, 0x56, 0x92, 0xd7, 0x4b };
 
     CreadDdrRegResponce rdrr;
     DWORD readLeng = 0;
-    c.Read((TCHAR*)rdrr.bufferSrc(), rdrr.bufferSize(), &readLeng);
+    ret = c.Read((TCHAR*)rdrr.bufferSrc(), rdrr.bufferSize(), &readLeng);
+    if (ret != 0)
+    {
+        writeLog(std::string("Read reg command receive error!"), edit);
+        return 3;
+    }
 
     rdrr.format();
 
@@ -62,16 +82,18 @@ int testOneReg(CSerial &c, CEdit &edit)
 
     if (rdrr.checkResponceCrc())
     {
-        std::cout << "error crc" << std::endl;
+        writeLog(std::string("Read reg command receive CRC error!"), edit);
+        return 4;
     }
 
     return 0;
 }
 
-//#define CHECK
+#define CHECK
 
 int initGddrDataFlow(CSerial &c, CEdit &edit)
 {
+    int ret = 0;
     CwriteDdrRegInput wdri;
     CreadDdrRegInput rdri;
     CreadDdrRegResponce rdrr;
@@ -113,28 +135,47 @@ int initGddrDataFlow(CSerial &c, CEdit &edit)
         writeLog(wdri.getDataString(), edit);
 
 
-        c.Write((const TCHAR*)wdri.bufferSrc(), wdri.bufferSize());
+        ret = c.Write((const TCHAR*)wdri.bufferSrc(), wdri.bufferSize());
+        if (ret != 0)
+        {
+            writeLog(std::string("Read reg command receive error!"), edit);
+            return 3;
+        }
+
 #ifdef CHECK
         rdri.setRegAddr(regAddr);
         rdri.calculateCrc();
-        rdri.printOut();
-        c.Write((const TCHAR*)rdri.bufferSrc(), rdri.bufferSize());
+        writeLog(rdri.getDataString(), edit);
+        ret = c.Write((const TCHAR*)rdri.bufferSrc(), rdri.bufferSize());
+        if (ret != 0)
+        {
+            writeLog(std::string("Read reg command send error!"), edit);
+            return 3;
+        }
+
 
         readLength = rdrr.bufferSize();
-        c.Write((TCHAR *)rdrr.bufferSrc(), rdrr.bufferSize(), &readLength);
-
+        ret = c.Read((TCHAR *)rdrr.bufferSrc(), rdrr.bufferSize(), &readLength);
+        if (ret != 0)
+        {
+            writeLog(std::string("Read reg command receive error!"), edit);
+            return 3;
+        }
         rdrr.format();
         if (rdrr.checkResponceHead())
         {
-            std::cout << "checkResponceHead error" << std::endl;
+            writeLog(std::string("checkResponceHead error!"), edit);
+            //return 3;
         }
         if (rdrr.checkResponceCrc())
         {
-            std::cout << "checkResponceCrc error" << std::endl;
+            writeLog(std::string("checkResponceCrc error!"), edit);
+           // return 3;
         }
         if (rdrr.checkMagicNum1())
         {
-            std::cout << "checkMagicNum1 error" << std::endl;
+            writeLog(std::string("checkMagicNum1 error!"), edit);
+            //return 3;
         }
         writeLog(rdrr.getDataString(), edit);
 #endif
@@ -145,6 +186,7 @@ int initGddrDataFlow(CSerial &c, CEdit &edit)
 
 int writeOneReg(CSerial &c, unsigned int addr, unsigned int data, CEdit &edit)
 {
+    int ret = 0;
     CwriteDdrRegInput wdri;
     wdri.setType(3);
     wdri.setUnicast();
@@ -162,6 +204,7 @@ int writeOneReg(CSerial &c, unsigned int addr, unsigned int data, CEdit &edit)
 
 int readOneReg(CSerial &c, unsigned int addr, unsigned int *addrData, CEdit &edit)
 {
+    int ret = 0;
     unsigned int regAddr = 0;
     unsigned int regData = 0;
     DWORD readLength = 0;

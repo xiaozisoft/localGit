@@ -1,7 +1,7 @@
 #pragma once
 #include "Serial.h"
 
-int setAddrInit(CSerial &c);
+int setAddrInit(CSerial &c, CEdit &edit);
 int testOneReg(CSerial &c, CEdit &edit);
 int initGddrDataFlow(CSerial &c, CEdit &edit);
 

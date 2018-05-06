@@ -64,7 +64,7 @@ public:
     afx_msg void OnCbnSelchangeCombo();
     afx_msg void OnCbnSelchangeComboBoard();
     // 写进内存的数据
-    CEdit ddrWriteData;
+    CEdit ddrData;
     afx_msg void OnBnClickedButtonWrite();
     afx_msg void OnBnClickedButtonInit();
     afx_msg void OnBnClickedButtonWritereg();
@@ -82,4 +82,6 @@ public:
     afx_msg void OnCbnSelchangeComboDataBit();
     afx_msg void OnCbnSelchangeComboStopBit();
     afx_msg void OnCbnSelchangeComboCode();
+    // //背景而已没什么作用
+    CStatic gddrDataBack;
 };

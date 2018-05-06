@@ -243,7 +243,6 @@ int main(int argc, char** argv)
     std::string comPort;
     
     Communication c("COM3");
-    //c.config(115200);
 
     testInit(c);
     testOneReg(c);

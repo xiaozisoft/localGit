@@ -15,6 +15,5 @@ public:
     int get(const unsigned int start, const unsigned int end, unsigned char *value);
 private:
     std::bitset<8> oneByte;
-
 };
 

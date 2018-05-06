@@ -71,7 +71,7 @@ void CgddrToolDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_BUTTON_SERIAL, serialCtrlButton);
     DDX_Control(pDX, IDC_COMBO__PORT, serialPortNum);
     DDX_Control(pDX, IDC_COMBO_BOARD, serialBoardrate);
-    DDX_Control(pDX, IDC_EDIT_DDR_DATA, ddrWriteData);
+    DDX_Control(pDX, IDC_EDIT_DDR_DATA, ddrData);
     DDX_Text(pDX, IDC_EDIT_BASEADDRESS, regBaseAddrStr);
     DDV_MaxChars(pDX, regBaseAddrStr, 10);
     DDX_Text(pDX, IDC_EDIT_ADDR_OFFSET, regOffsetAddrStr);
@@ -84,6 +84,7 @@ void CgddrToolDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_COMBO_DATA_BIT, serialDataBit);
     DDX_Control(pDX, IDC_COMBO_STOP_BIT, serialStopbit);
     DDX_Control(pDX, IDC_COMBO_CODE, serialCode);
+    DDX_Control(pDX, IDC_STATIC_GDDR_DATA, gddrDataBack);
 }
 
 BEGIN_MESSAGE_MAP(CgddrToolDlg, CDialogEx)
@@ -140,7 +141,7 @@ BOOL CgddrToolDlg::OnInitDialog()
 	ShowWindow(SW_MINIMIZE);
 
 	// TODO: 在此添加额外的初始化代码
-
+    //设置默认值
     SetDlgItemText(serialCtrlButton.GetDlgCtrlID(), _T("打开串口"));
     serialPortNum.SetCurSel(2);
     serialBoardrate.SetCurSel(0);
@@ -148,6 +149,19 @@ BOOL CgddrToolDlg::OnInitDialog()
     serialDataBit.SetCurSel(3);
     serialStopbit.SetCurSel(1);
     serialCode.SetCurSel(1);
+
+    ddrData.ShowWindow(FALSE);
+    gddrDataBack.ShowWindow(FALSE);
+
+    //获取波特率和端口号
+    CString boardrateTmp;
+    serialBoardrate.UpdateData();
+    serialBoardrate.GetLBText(serialBoardrate.GetCurSel(), boardrateTmp);
+
+    comBoardrate = atoi(boardrateTmp);
+
+    serialPortNum.UpdateData();
+    serialPortNum.GetLBText(serialPortNum.GetCurSel(), comName);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -210,12 +224,14 @@ void CgddrToolDlg::OnBnClickedButtonSerial()
     
     if (s == _T("打开串口"))
     {
-        if (serialM.Open(comName) != ERROR_SUCCESS)
+        if (serialM.Open(comName, 0, 0, false) != ERROR_SUCCESS)
         {
             AfxMessageBox(_T("Unable to open COM-port"), MB_ICONSTOP | MB_OK);
             return;
         }
-        serialM.Setup(CSerial::EBaudrate(comBoardrate));
+        serialM.Setup(CSerial::EBaudrate(comBoardrate), CSerial::EData8, CSerial::EParNone, CSerial::EStop1);
+        serialM.Purge();
+        serialM.SetupReadTimeouts(CSerial::EReadTimeoutBlocking);
         writeToLog(_T("打开串口"));
         SetDlgItemText(serialCtrlButton.GetDlgCtrlID(), _T("关闭串口"));
     }
@@ -236,6 +252,7 @@ void CgddrToolDlg::OnCbnSelchangeCombo()
     serialPortNum.GetLBText(serialPortNum.GetCurSel(), portNum);
 
     comName = portNum;
+    writeToLog(comName);
 }
 
 
@@ -252,7 +269,7 @@ void CgddrToolDlg::OnCbnSelchangeComboBoard()
 
 void CgddrToolDlg::OnBnClickedButtonInit()
 {
-    setAddrInit(serialM);
+    setAddrInit(serialM, recvDataLog);
     testOneReg(serialM, recvDataLog);
     initGddrDataFlow(serialM, recvDataLog);
     // TODO: 初始化ddr控制器
