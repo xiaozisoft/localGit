@@ -12,6 +12,8 @@
 #include <string>
 #include "tool.h"
 #include "testOperation.h"
+#include "readHexFile.h"
+#include "testData.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -104,6 +106,7 @@ BEGIN_MESSAGE_MAP(CgddrToolDlg, CDialogEx)
     ON_CBN_SELCHANGE(IDC_COMBO_DATA_BIT, &CgddrToolDlg::OnCbnSelchangeComboDataBit)
     ON_CBN_SELCHANGE(IDC_COMBO_STOP_BIT, &CgddrToolDlg::OnCbnSelchangeComboStopBit)
     ON_CBN_SELCHANGE(IDC_COMBO_CODE, &CgddrToolDlg::OnCbnSelchangeComboCode)
+    ON_BN_CLICKED(IDC_BUTTON5, &CgddrToolDlg::OnBnClickedButton5)
 END_MESSAGE_MAP()
 
 
@@ -139,6 +142,8 @@ BOOL CgddrToolDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	ShowWindow(SW_MINIMIZE);
+
+    //.readInitData();
 
 	// TODO: 在此添加额外的初始化代码
     //设置默认值
@@ -333,11 +338,15 @@ void CgddrToolDlg::OnBnClickedButtonReadreg()
 void CgddrToolDlg::OnBnClickedButtonReaddata()
 {
     // TODO: 读取ddr中的数据
+    readDdrData(serialM, 0x00, NULL, 0, recvDataLog);
 }
 
 void CgddrToolDlg::OnBnClickedButtonWrite()
 {
     // TODO: 将数据写到ddr
+    readDdrDataFile rddf;
+    rddf.readDdrDataInput();
+    writeDdrData(serialM, 0x00, rddf.ddrInData.data(), 64, recvDataLog);
 }
 
 BOOL CgddrToolDlg::PreTranslateMessage(MSG* pMsg)
@@ -482,4 +491,11 @@ void CgddrToolDlg::OnCbnSelchangeComboStopBit()
 void CgddrToolDlg::OnCbnSelchangeComboCode()
 {
     // TODO: 在此添加控件通知处理程序代码
+}
+
+
+void CgddrToolDlg::OnBnClickedButton5()
+{
+    // TODO: 在此添加控件通知处理程序代码
+    writeDataFlow(serialM, recvDataLog);
 }

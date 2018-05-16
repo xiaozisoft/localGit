@@ -5,6 +5,7 @@
 #pragma once
 #include "afxwin.h"
 #include "Serial.h"
+#include "readHexFile.h"
 
 // CgddrToolDlg 对话框
 class CgddrToolDlg : public CDialogEx
@@ -84,4 +85,6 @@ public:
     afx_msg void OnCbnSelchangeComboCode();
     // //背景而已没什么作用
     CStatic gddrDataBack;
+    //readHexFile initFile;
+    afx_msg void OnBnClickedButton5();
 };

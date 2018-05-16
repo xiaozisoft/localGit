@@ -9,6 +9,9 @@
 #include "testInitConf.h"
 #include "testData.h"
 #include <tchar.h>
+#include "readHexFile.h"
+
+#define ReadTimeOut                 (10000)
 
 static void writeLog(std::string log, CEdit &edit)
 {
@@ -86,19 +89,21 @@ int testOneReg(CSerial &c, CEdit &edit)
         return 4;
     }
 
+    writeLog(std::string("One ctrl reg read write test OK!:"), edit);
     return 0;
 }
 
+#define UseFileInit
 #define CHECK
 
 int initGddrDataFlow(CSerial &c, CEdit &edit)
 {
     int ret = 0;
+    readHexFile initHexFile(DefaultInitFilePath);
     CwriteDdrRegInput wdri;
     CreadDdrRegInput rdri;
     CreadDdrRegResponce rdrr;
 
-    Rwe tmpCase;
     unsigned int regAddr = 0;
     unsigned int regData = 0;
     DWORD readLength = 0;
@@ -112,7 +117,76 @@ int initGddrDataFlow(CSerial &c, CEdit &edit)
     rdri.setUnicast();
     rdri.setLowFlagReg();
     rdri.setChipAddr(0);
+#ifdef UseFileInit
+    std::array<unsigned int, 3> tmpCase;
+    initHexFile.readInitData();
+    for (size_t i = 0; i < initHexFile.initData.size(); i++)
+    {
+        tmpCase = initHexFile.initData[i];
+        if (tmpCase[0])
+        {
+            regAddr = 0x0002000;
+        }
+        else
+        {
+            regAddr = 0x0000000;
+        }
 
+        regAddr += tmpCase[1];
+        regData = tmpCase[2];
+
+        wdri.setRegAddr(regAddr);
+        wdri.setData(regData);
+        wdri.calculateCrc();
+
+        writeLog(wdri.getDataString(), edit);
+
+
+        ret = c.Write((const TCHAR*)wdri.bufferSrc(), wdri.bufferSize());
+        if (ret != 0)
+        {
+            writeLog(std::string("Write reg command error!"), edit);
+            return 3;
+        }
+
+#ifdef CHECK
+        rdri.setRegAddr(regAddr);
+        rdri.calculateCrc();
+        writeLog(rdri.getDataString(), edit);
+        ret = c.Write((const TCHAR*)rdri.bufferSrc(), rdri.bufferSize());
+        if (ret != 0)
+        {
+            writeLog(std::string("Read reg command send error!"), edit);
+            return 3;
+        }
+
+
+        readLength = rdrr.bufferSize();
+        ret = c.Read((TCHAR *)rdrr.bufferSrc(), rdrr.bufferSize(), &readLength);
+        if (ret != 0)
+        {
+            writeLog(std::string("Read reg command receive error!"), edit);
+            return 3;
+        }
+        rdrr.format();
+        if (rdrr.checkResponceHead())
+        {
+            writeLog(std::string("checkResponceHead error!"), edit);
+        }
+        if (rdrr.checkResponceCrc())
+        {
+            writeLog(std::string("checkResponceCrc error!"), edit);
+        }
+        if (rdrr.checkMagicNum1())
+        {
+            writeLog(std::string("checkMagicNum1 error!"), edit);
+        }
+        writeLog(rdrr.getDataString(), edit);
+#endif
+    }
+#else
+
+    Rwe tmpCase;
     for (size_t i = 0; i < getSize(); i++)
     {
         tmpCase = initDataFlow[i];
@@ -138,7 +212,7 @@ int initGddrDataFlow(CSerial &c, CEdit &edit)
         ret = c.Write((const TCHAR*)wdri.bufferSrc(), wdri.bufferSize());
         if (ret != 0)
         {
-            writeLog(std::string("Read reg command receive error!"), edit);
+            writeLog(std::string("Write reg command error!"), edit);
             return 3;
         }
 
@@ -180,6 +254,170 @@ int initGddrDataFlow(CSerial &c, CEdit &edit)
         writeLog(rdrr.getDataString(), edit);
 #endif
     }
+#endif // UseFileInit
+
+    return 0;
+}
+
+int writeDataFlow(CSerial &c, CEdit &edit)
+{
+    int ret = 0;
+    readHexFile initHexFile(RegFilePath);
+    CwriteDdrRegInput wdri;
+    CreadDdrRegInput rdri;
+    CreadDdrRegResponce rdrr;
+
+    unsigned int regAddr = 0;
+    unsigned int regData = 0;
+    DWORD readLength = 0;
+
+    wdri.setType(3);
+    wdri.setUnicast();
+    wdri.setLowFlagReg();
+    wdri.setChipAddr(0);
+
+    rdri.setType(6);
+    rdri.setUnicast();
+    rdri.setLowFlagReg();
+    rdri.setChipAddr(0);
+#ifdef UseFileInit
+    std::array<unsigned int, 3> tmpCase;
+    initHexFile.readInitData();
+    for (size_t i = 0; i < initHexFile.initData.size(); i++)
+    {
+        tmpCase = initHexFile.initData[i];
+        if (tmpCase[0])
+        {
+            regAddr = 0x0002000;
+        }
+        else
+        {
+            regAddr = 0x0000000;
+        }
+
+        regAddr += tmpCase[1];
+        regData = tmpCase[2];
+
+        wdri.setRegAddr(regAddr);
+        wdri.setData(regData);
+        wdri.calculateCrc();
+
+        writeLog(wdri.getDataString(), edit);
+
+
+        ret = c.Write((const TCHAR*)wdri.bufferSrc(), wdri.bufferSize());
+        if (ret != 0)
+        {
+            writeLog(std::string("Write reg command error!"), edit);
+            return 3;
+        }
+
+#ifdef CHECK
+        rdri.setRegAddr(regAddr);
+        rdri.calculateCrc();
+        writeLog(rdri.getDataString(), edit);
+        ret = c.Write((const TCHAR*)rdri.bufferSrc(), rdri.bufferSize());
+        if (ret != 0)
+        {
+            writeLog(std::string("Read reg command send error!"), edit);
+            return 3;
+        }
+
+
+        readLength = rdrr.bufferSize();
+        ret = c.Read((TCHAR *)rdrr.bufferSrc(), rdrr.bufferSize(), &readLength);
+        if (ret != 0)
+        {
+            writeLog(std::string("Read reg command receive error!"), edit);
+            return 3;
+        }
+        rdrr.format();
+        if (rdrr.checkResponceHead())
+        {
+            writeLog(std::string("checkResponceHead error!"), edit);
+        }
+        if (rdrr.checkResponceCrc())
+        {
+            writeLog(std::string("checkResponceCrc error!"), edit);
+        }
+        if (rdrr.checkMagicNum1())
+        {
+            writeLog(std::string("checkMagicNum1 error!"), edit);
+        }
+        writeLog(rdrr.getDataString(), edit);
+#endif
+    }
+#else
+
+    Rwe tmpCase;
+    for (size_t i = 0; i < getSize(); i++)
+    {
+        tmpCase = initDataFlow[i];
+        if (tmpCase.baseAddr)
+        {
+            regAddr = 0x0002000;
+        }
+        else
+        {
+            regAddr = 0x0000000;
+        }
+
+        regAddr += tmpCase.offsetAddr;
+        regData = tmpCase.data;
+
+        wdri.setRegAddr(regAddr);
+        wdri.setData(regData);
+        wdri.calculateCrc();
+
+        writeLog(wdri.getDataString(), edit);
+
+
+        ret = c.Write((const TCHAR*)wdri.bufferSrc(), wdri.bufferSize());
+        if (ret != 0)
+        {
+            writeLog(std::string("Write reg command error!"), edit);
+            return 3;
+        }
+
+#ifdef CHECK
+        rdri.setRegAddr(regAddr);
+        rdri.calculateCrc();
+        writeLog(rdri.getDataString(), edit);
+        ret = c.Write((const TCHAR*)rdri.bufferSrc(), rdri.bufferSize());
+        if (ret != 0)
+        {
+            writeLog(std::string("Read reg command send error!"), edit);
+            return 3;
+        }
+
+
+        readLength = rdrr.bufferSize();
+        ret = c.Read((TCHAR *)rdrr.bufferSrc(), rdrr.bufferSize(), &readLength);
+        if (ret != 0)
+        {
+            writeLog(std::string("Read reg command receive error!"), edit);
+            return 3;
+        }
+        rdrr.format();
+        if (rdrr.checkResponceHead())
+        {
+            writeLog(std::string("checkResponceHead error!"), edit);
+            //return 3;
+        }
+        if (rdrr.checkResponceCrc())
+        {
+            writeLog(std::string("checkResponceCrc error!"), edit);
+            // return 3;
+        }
+        if (rdrr.checkMagicNum1())
+        {
+            writeLog(std::string("checkMagicNum1 error!"), edit);
+            //return 3;
+        }
+        writeLog(rdrr.getDataString(), edit);
+#endif
+    }
+#endif // UseFileInit
 
     return 0;
 }
@@ -296,15 +534,15 @@ int readDdrData(CSerial &c, unsigned int ad, unsigned char *ddrData, unsigned in
     rddr.format();
     if (rddr.checkResponceHead())
     {
-        std::cout << "checkResponceHead error" << std::endl;
+        writeLog(std::string("checkResponceHead error!"), edit);
     }
     if (rddr.checkResponceCrc())
     {
-        std::cout << "checkResponceCrc error" << std::endl;
+        writeLog(std::string("checkResponceCrc error!"), edit);
     }
     if (rddr.checkMagicNum1())
     {
-        std::cout << "checkMagicNum1 error" << std::endl;
+        writeLog(std::string("checkMagicNum1 error!"), edit);
     }
     writeLog(rddr.getDataString(), edit);
 
