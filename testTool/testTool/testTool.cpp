@@ -275,7 +275,7 @@ int main(int argc, char** argv)
 
     //readRegResponceTest();
 
-    system("PAUSE");
+    _tsystem(_T("PAUSE"));
     return 0;
 }
 

@@ -1,0 +1,8 @@
+[PHY] zzz write addr=0x724, data=0xa04
+[PHY] zzz write addr=0x728, data=0x92
+[PHY] zzz write addr=0x728, data=0x12
+[PHY] zzz polling addr=0x730,data=0x1, bit=31
+[PHY] zzz write addr=0x4, data=0x10000000
+[PHY] zzz write addr=0x4, data=0x30000000
+[PHY] zzz write addr=0x734, data=0xffe00000
+[PHY] zzz write addr=0x73c, data=0xffe00000

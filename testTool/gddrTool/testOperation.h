@@ -9,6 +9,6 @@ int readOneReg(CSerial &c, unsigned int addr, unsigned int *addrData, CEdit &edi
 int writeOneReg(CSerial &c, unsigned int addr, unsigned int data, CEdit &edit);
 int writeDdrData(CSerial &c, unsigned int ad, unsigned char *ddrData, unsigned int ddrDataLen, CEdit &edit);
 int readDdrData(CSerial &c, unsigned int ad, unsigned char *ddrData, unsigned int ddrDataLen, CEdit &edit);
-int writeDataFlow(CSerial &c, CEdit &edit);
+int writeDataFlow(CSerial &c, CEdit &edit, CString path);
 
 

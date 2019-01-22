@@ -6,16 +6,15 @@
 #define DefaultInitFilePath     (_T("./init_mem.dat"))
 //#define RegFilePath     (_T("./regWrite.dat"))
 #define RegFilePath     (_T("./text.txt"))
-class readHexFile
+class executionFile
 {
 public:
-    readHexFile(std::string fileName);
-    ~readHexFile();
+    executionFile(std::string fileName);
+    ~executionFile();
 
-    void readInitData();
+    //void readInitData();
 
 public:
     std::vector<std::array <unsigned int, 3>> initData;
     std::ifstream fin;
 };
-

@@ -74,6 +74,9 @@ public:
     CString regOffsetAddrStr;
     CString regValueStr;
     CString gaddrAddrStr;
+
+    CString configFilepath;
+
     virtual BOOL PreTranslateMessage(MSG* pMsg);
 
     void writeToLog(CString log);
@@ -87,4 +90,6 @@ public:
     CStatic gddrDataBack;
     //readHexFile initFile;
     afx_msg void OnBnClickedButton5();
+    afx_msg void OnBnClickedButtonCleanLog();
+    afx_msg void OnBnClickedButton6();
 };

@@ -22,12 +22,16 @@ void readHexFile::readInitData()
     if (fin)
     {
         std::string s;
+        int testp = 0;
         while (std::getline(fin, s))
         {
             std::string baseTmp;
             std::string offsetTmp;
             std::string valueTmp;
             std::array<unsigned int, 3> tmpUnit;
+            //[PHY] zzz polling addr = 0x730, data = 0x1, bit = 31
+            //[PHY] zzz write addr = 0x4, data = 0x10000000
+            testp = s.find("=");
 
             baseTmp = s.substr(0, 1);
             offsetTmp = s.substr(2, 4);

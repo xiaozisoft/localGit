@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{53A40B55-13E0-45D5-86F1-7E52512B996C}</ProjectGuid>
-    <RootNamespace>gddrTool</RootNamespace>
+    <ProjectGuid>{298E90B7-8E39-4684-99E2-6E49FEDA9CB3}</ProjectGuid>
+    <RootNamespace>ddrAddrTool</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
     <Keyword>MFCProj</Keyword>
   </PropertyGroup>
@@ -37,7 +37,7 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -45,7 +45,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
-    <UseOfMfc>Static</UseOfMfc>
+    <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -53,7 +53,7 @@
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
-    <UseOfMfc>Static</UseOfMfc>
+    <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -91,8 +91,6 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\Serial\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -114,8 +112,6 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\Serial\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -139,8 +135,6 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\Serial\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -166,8 +160,6 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\Serial\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -189,74 +181,39 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CbyteStream.h" />
-    <ClInclude Include="Ccrc.h" />
-    <ClInclude Include="CinputType.h" />
-    <ClInclude Include="Communication.h" />
-    <ClInclude Include="CreadDdrDataInput.h" />
-    <ClInclude Include="CreadDdrDataResponce.h" />
-    <ClInclude Include="CreadDdrRegInput.h" />
-    <ClInclude Include="CreadDdrRegRespoce.h" />
-    <ClInclude Include="CwriteDdrDataInput.h" />
-    <ClInclude Include="CwriteDdrRegInput.h" />
-    <ClInclude Include="executionFile.h" />
-    <ClInclude Include="gddrTool.h" />
-    <ClInclude Include="gddrToolDlg.h" />
-    <ClInclude Include="readHexFile.h" />
+    <ClInclude Include="ddrAddrTool.h" />
+    <ClInclude Include="ddrAddrToolDlg.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="testData.h" />
-    <ClInclude Include="testInitConf.h" />
-    <ClInclude Include="testOperation.h" />
     <ClInclude Include="tool.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CbyteStream.cpp" />
-    <ClCompile Include="Ccrc.cpp" />
-    <ClCompile Include="CinputType.cpp" />
-    <ClCompile Include="Communication.cpp" />
-    <ClCompile Include="CreadDdrDataInput.cpp" />
-    <ClCompile Include="CreadDdrDataResponce.cpp" />
-    <ClCompile Include="CreadDdrRegInput.cpp" />
-    <ClCompile Include="CreadDdrRegRespoce.cpp" />
-    <ClCompile Include="CwriteDdrDataInput.cpp" />
-    <ClCompile Include="CwriteDdrRegInput.cpp" />
-    <ClCompile Include="executionFile.cpp" />
-    <ClCompile Include="gddrTool.cpp" />
-    <ClCompile Include="gddrToolDlg.cpp" />
-    <ClCompile Include="readHexFile.cpp" />
+    <ClCompile Include="ddrAddrTool.cpp" />
+    <ClCompile Include="ddrAddrToolDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="testData.cpp" />
-    <ClCompile Include="testInitConf.cpp" />
-    <ClCompile Include="testOperation.cpp" />
     <ClCompile Include="tool.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="gddrTool.rc" />
+    <ResourceCompile Include="ddrAddrTool.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\gddrTool.rc2" />
+    <None Include="res\ddrAddrTool.rc2" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\gddrTool.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Serial\Serial.vcxproj">
-      <Project>{2d5a46d0-8556-4df6-a5d0-cb2c00ab5f05}</Project>
-    </ProjectReference>
+    <Image Include="res\ddrAddrTool.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties RESOURCE_FILE="gddrTool.rc" />
+      <UserProperties RESOURCE_FILE="ddrAddrTool.rc" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

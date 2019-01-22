@@ -78,6 +78,9 @@
     <ClInclude Include="readHexFile.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="executionFile.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="gddrTool.cpp">
@@ -132,6 +135,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="readHexFile.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="executionFile.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

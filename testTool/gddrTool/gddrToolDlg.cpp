@@ -107,6 +107,8 @@ BEGIN_MESSAGE_MAP(CgddrToolDlg, CDialogEx)
     ON_CBN_SELCHANGE(IDC_COMBO_STOP_BIT, &CgddrToolDlg::OnCbnSelchangeComboStopBit)
     ON_CBN_SELCHANGE(IDC_COMBO_CODE, &CgddrToolDlg::OnCbnSelchangeComboCode)
     ON_BN_CLICKED(IDC_BUTTON5, &CgddrToolDlg::OnBnClickedButton5)
+    ON_BN_CLICKED(IDC_BUTTON_CLEAN_LOG, &CgddrToolDlg::OnBnClickedButtonCleanLog)
+    ON_BN_CLICKED(IDC_BUTTON6, &CgddrToolDlg::OnBnClickedButton6)
 END_MESSAGE_MAP()
 
 
@@ -167,6 +169,8 @@ BOOL CgddrToolDlg::OnInitDialog()
 
     serialPortNum.UpdateData();
     serialPortNum.GetLBText(serialPortNum.GetCurSel(), comName);
+
+    recvDataLog.SetLimitText(0);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -229,7 +233,7 @@ void CgddrToolDlg::OnBnClickedButtonSerial()
     
     if (s == _T("打开串口"))
     {
-        if (serialM.Open(comName, 0, 0, false) != ERROR_SUCCESS)
+        if (serialM.Open(comName, 0, 0, true) != ERROR_SUCCESS)
         {
             AfxMessageBox(_T("Unable to open COM-port"), MB_ICONSTOP | MB_OK);
             return;
@@ -497,5 +501,33 @@ void CgddrToolDlg::OnCbnSelchangeComboCode()
 void CgddrToolDlg::OnBnClickedButton5()
 {
     // TODO: 在此添加控件通知处理程序代码
-    writeDataFlow(serialM, recvDataLog);
+    writeDataFlow(serialM, recvDataLog, configFilepath);
+}
+
+
+void CgddrToolDlg::OnBnClickedButtonCleanLog()
+{
+    // TODO: 在此添加控件通知处理程序代码
+    recvDataLog.SetWindowText(_T(""));
+}
+
+
+void CgddrToolDlg::OnBnClickedButton6()
+{
+    // TODO: 在此添加控件通知处理程序代码
+    TCHAR szFilter[] = _T("文本文件(*.txt)|*.txt|所有文件(*.*)|*.*||");
+    // 构造打开文件对话框   
+    CFileDialog fileDlg(TRUE, _T("txt"), NULL, 0, szFilter, this);
+
+    // 显示打开文件对话框   
+    if (IDOK == fileDlg.DoModal())
+    {
+        // 如果点击了文件对话框上的“打开”按钮，则将选择的文件路径显示到编辑框里   
+        configFilepath = fileDlg.GetPathName();
+        int nLength = recvDataLog.SendMessage(WM_GETTEXTLENGTH);
+        recvDataLog.SetSel(nLength, nLength);
+        recvDataLog.ReplaceSel(configFilepath);
+
+        //SetDlgItemText(IDC_OPEN_EDIT, strFilePath);
+    }
 }

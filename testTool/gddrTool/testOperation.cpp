@@ -72,7 +72,7 @@ int testOneReg(CSerial &c, CEdit &edit)
 
     CreadDdrRegResponce rdrr;
     DWORD readLeng = 0;
-    ret = c.Read((TCHAR*)rdrr.bufferSrc(), rdrr.bufferSize(), &readLeng);
+    ret = c.Read((TCHAR*)rdrr.bufferSrc(), rdrr.bufferSize(), &readLeng, 0, 2000);
     if (ret != 0)
     {
         writeLog(std::string("Read reg command receive error!"), edit);
@@ -162,7 +162,7 @@ int initGddrDataFlow(CSerial &c, CEdit &edit)
 
 
         readLength = rdrr.bufferSize();
-        ret = c.Read((TCHAR *)rdrr.bufferSrc(), rdrr.bufferSize(), &readLength);
+        ret = c.Read((TCHAR *)rdrr.bufferSrc(), rdrr.bufferSize(), &readLength, 0, 2000);
         if (ret != 0)
         {
             writeLog(std::string("Read reg command receive error!"), edit);
@@ -229,7 +229,7 @@ int initGddrDataFlow(CSerial &c, CEdit &edit)
 
 
         readLength = rdrr.bufferSize();
-        ret = c.Read((TCHAR *)rdrr.bufferSrc(), rdrr.bufferSize(), &readLength);
+        ret = c.Read((TCHAR *)rdrr.bufferSrc(), rdrr.bufferSize(), &readLength, 0, 2000);
         if (ret != 0)
         {
             writeLog(std::string("Read reg command receive error!"), edit);
@@ -259,9 +259,15 @@ int initGddrDataFlow(CSerial &c, CEdit &edit)
     return 0;
 }
 
-int writeDataFlow(CSerial &c, CEdit &edit)
+int writeDataFlow(CSerial &c, CEdit &edit, CString path)
 {
     int ret = 0;
+    
+    if (path.IsEmpty())
+    {
+        path.SetString(RegFilePath);
+    }
+
     readHexFile initHexFile(RegFilePath);
     CwriteDdrRegInput wdri;
     CreadDdrRegInput rdri;
@@ -325,7 +331,7 @@ int writeDataFlow(CSerial &c, CEdit &edit)
 
 
         readLength = rdrr.bufferSize();
-        ret = c.Read((TCHAR *)rdrr.bufferSrc(), rdrr.bufferSize(), &readLength);
+        ret = c.Read((TCHAR *)rdrr.bufferSrc(), rdrr.bufferSize(), &readLength, 0, 2000);
         if (ret != 0)
         {
             writeLog(std::string("Read reg command receive error!"), edit);
@@ -392,7 +398,7 @@ int writeDataFlow(CSerial &c, CEdit &edit)
 
 
         readLength = rdrr.bufferSize();
-        ret = c.Read((TCHAR *)rdrr.bufferSrc(), rdrr.bufferSize(), &readLength);
+        ret = c.Read((TCHAR *)rdrr.bufferSrc(), rdrr.bufferSize(), &readLength, 0, 2000);
         if (ret != 0)
         {
             writeLog(std::string("Read reg command receive error!"), edit);
@@ -425,6 +431,7 @@ int writeDataFlow(CSerial &c, CEdit &edit)
 int writeOneReg(CSerial &c, unsigned int addr, unsigned int data, CEdit &edit)
 {
     int ret = 0;
+    LONG serialError = ERROR_SUCCESS;
     CwriteDdrRegInput wdri;
     wdri.setType(3);
     wdri.setUnicast();
@@ -436,13 +443,19 @@ int writeOneReg(CSerial &c, unsigned int addr, unsigned int data, CEdit &edit)
     wdri.calculateCrc();
     writeLog(wdri.getDataString(), edit);
 
-    c.Write((const TCHAR*)wdri.bufferSrc(), wdri.bufferSize());
+    serialError = c.Write((const TCHAR*)wdri.bufferSrc(), wdri.bufferSize());
+    if (serialError != ERROR_SUCCESS)
+    {
+        writeLog(_T("Write write reg command Error!"), edit);
+        return 1;
+    }
     return 0;
 }
 
 int readOneReg(CSerial &c, unsigned int addr, unsigned int *addrData, CEdit &edit)
 {
     int ret = 0;
+    LONG serialError = ERROR_SUCCESS;
     unsigned int regAddr = 0;
     unsigned int regData = 0;
     DWORD readLength = 0;
@@ -458,24 +471,41 @@ int readOneReg(CSerial &c, unsigned int addr, unsigned int *addrData, CEdit &edi
     rdri.setRegAddr(regAddr);
     rdri.calculateCrc();
     writeLog(rdri.getDataString(), edit);
-    c.Write((const TCHAR*)rdri.bufferSrc(), rdri.bufferSize());
-
+    serialError = c.Write((const TCHAR*)rdri.bufferSrc(), rdri.bufferSize());
+    if (serialError != ERROR_SUCCESS)
+    {
+        writeLog(_T("Write read reg command Error!"), edit);
+        return 1;
+    }
     readLength = rdrr.bufferSize();
-    c.Read((TCHAR *)rdrr.bufferSrc(), rdrr.bufferSize(), &readLength);
+    serialError = c.Read((TCHAR *)rdrr.bufferSrc(), rdrr.bufferSize(), &readLength, 0, 2000);
+    if (serialError != ERROR_SUCCESS)
+    {
+        if (serialError == ERROR_TIMEOUT)
+        {
+            writeLog(_T("Read reg data TimeOut Error!"), edit);
+        }
+        else
+        {
+            writeLog(_T("Read reg data Error!"), edit);
+        }
+
+        return 2;
+    }
 
     rdrr.format();
     *addrData = rdrr.getRegData();
     if (rdrr.checkResponceHead())
     {
-        std::cout << "checkResponceHead error" << std::endl;
+        writeLog(std::string("checkResponceHead error!"), edit);
     }
     if (rdrr.checkResponceCrc())
     {
-        std::cout << "checkResponceCrc error" << std::endl;
+        writeLog(std::string("checkResponceCrc error!"), edit);
     }
     if (rdrr.checkMagicNum1())
     {
-        std::cout << "checkMagicNum1 error" << std::endl;
+        writeLog(std::string("checkMagicNum1 error!"), edit);
     }
     writeLog(rdrr.getDataString(), edit);
     return 0;
@@ -484,7 +514,7 @@ int readOneReg(CSerial &c, unsigned int addr, unsigned int *addrData, CEdit &edi
 int writeDdrData(CSerial &c, unsigned int ad, unsigned char *ddrData, unsigned int ddrDataLen, CEdit &edit)
 {
     CwriteDdrDataInput wddi;
-
+    LONG serialError = ERROR_SUCCESS;
     int addrTest = 0x0000;
 
     if (ad)
@@ -501,13 +531,18 @@ int writeDdrData(CSerial &c, unsigned int ad, unsigned char *ddrData, unsigned i
     wddi.calculateCrc();
     writeLog(wddi.getDataString(), edit);
 
-    c.Write((const TCHAR*)wddi.bufferSrc(), wddi.bufferSize());
-
+    serialError = c.Write((const TCHAR*)wddi.bufferSrc(), wddi.bufferSize());
+    if (serialError != ERROR_SUCCESS)
+    {
+        writeLog(_T("Write Ddr Data Error!"), edit);
+        return 1;
+    }
     return 0;
 }
 
 int readDdrData(CSerial &c, unsigned int ad, unsigned char *ddrData, unsigned int ddrDataLen, CEdit &edit)
 {
+    LONG serialError = ERROR_SUCCESS;
     CreadDdrDataInput rddi;
     CreadDdrDataResponce rddr;
 
@@ -527,10 +562,29 @@ int readDdrData(CSerial &c, unsigned int ad, unsigned char *ddrData, unsigned in
     rddi.calculateCrc();
     writeLog(rddi.getDataString(), edit);
 
-    c.Write((const TCHAR*)rddi.bufferSrc(), rddi.bufferSize());
-    std::cout << "read data:" << std::endl;
+    serialError = c.Write((const TCHAR*)rddi.bufferSrc(), rddi.bufferSize());
+    if (serialError != ERROR_SUCCESS)
+    {
+        writeLog(_T("Write ddr read command Error!"), edit);
+        return 1;
+    }
+
     readLength = rddr.bufferSize();
-    c.Read((TCHAR *)rddr.bufferSrc(), rddr.bufferSize(), &readLength);
+    serialError = c.Read((TCHAR *)rddr.bufferSrc(), rddr.bufferSize(), &readLength, 0, 2000);
+    if (serialError != ERROR_SUCCESS)
+    {
+        if (serialError == ERROR_TIMEOUT)
+        {
+            writeLog(_T("Read ddr data TimeOut Error!"), edit);
+        }
+        else
+        {
+            writeLog(_T("Read ddr data Error!"), edit);
+        }
+
+        return 2;
+    }
+
     rddr.format();
     if (rddr.checkResponceHead())
     {
